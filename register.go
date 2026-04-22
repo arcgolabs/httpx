@@ -1,0 +1,303 @@
+//revive:disable:file-length-limit Route registration helpers are kept together as one cohesive API surface.
+
+package httpx
+
+import (
+	"context"
+	"log/slog"
+	"reflect"
+	"runtime"
+	"strings"
+
+	"github.com/DaiYuANg/arcgo/collectionx"
+	"github.com/DaiYuANg/arcgo/pkg/option"
+	"github.com/danielgtaylor/huma/v2"
+	"github.com/samber/lo"
+	"github.com/samber/oops"
+)
+
+// Route registers a typed handler on the server.
+func Route[I, O any](s ServerRuntime, method, path string, handler TypedHandler[I, O], operationOptions ...OperationOption) error {
+	server := unwrapServer(s)
+	if server == nil {
+		return oops.In("httpx").
+			With("op", "route", "method", strings.ToUpper(method), "path", path).
+			Wrapf(ErrRouteNotRegistered, "validate server")
+	}
+	fullPath := joinRoutePath(server.basePath, path)
+	return registerTyped(server, server.HumaAPI(), method, fullPath, fullPath, handler, operationOptions, nil)
+}
+
+// Get registers a typed GET handler on the server.
+func Get[I, O any](s ServerRuntime, path string, handler TypedHandler[I, O], operationOptions ...OperationOption) error {
+	return Route(s, MethodGet, path, handler, operationOptions...)
+}
+
+// Post registers a typed POST handler on the server.
+func Post[I, O any](s ServerRuntime, path string, handler TypedHandler[I, O], operationOptions ...OperationOption) error {
+	return Route(s, MethodPost, path, handler, operationOptions...)
+}
+
+// Put registers a typed PUT handler on the server.
+func Put[I, O any](s ServerRuntime, path string, handler TypedHandler[I, O], operationOptions ...OperationOption) error {
+	return Route(s, MethodPut, path, handler, operationOptions...)
+}
+
+// Patch registers a typed PATCH handler on the server.
+func Patch[I, O any](s ServerRuntime, path string, handler TypedHandler[I, O], operationOptions ...OperationOption) error {
+	return Route(s, MethodPatch, path, handler, operationOptions...)
+}
+
+// Delete registers a typed DELETE handler on the server.
+func Delete[I, O any](s ServerRuntime, path string, handler TypedHandler[I, O], operationOptions ...OperationOption) error {
+	return Route(s, MethodDelete, path, handler, operationOptions...)
+}
+
+// Head registers a typed HEAD handler on the server.
+func Head[I, O any](s ServerRuntime, path string, handler TypedHandler[I, O], operationOptions ...OperationOption) error {
+	return Route(s, MethodHead, path, handler, operationOptions...)
+}
+
+// Options registers a typed OPTIONS handler on the server.
+func Options[I, O any](s ServerRuntime, path string, handler TypedHandler[I, O], operationOptions ...OperationOption) error {
+	return Route(s, MethodOptions, path, handler, operationOptions...)
+}
+
+// GroupRoute registers a typed handler under a route group.
+func GroupRoute[I, O any](g *Group, method, path string, handler TypedHandler[I, O], operationOptions ...OperationOption) error {
+	if g == nil || g.server == nil {
+		return oops.In("httpx").
+			With("op", "group_route", "method", strings.ToUpper(method), "path", path).
+			Wrapf(ErrRouteNotRegistered, "validate route group")
+	}
+	fullPath := joinRoutePath(g.server.basePath, joinRoutePath(g.prefix, path))
+
+	target := g.server.HumaAPI()
+	registerPath := fullPath
+	if g.humaGroup != nil {
+		target = g.humaGroup
+		registerPath = path
+	}
+
+	return registerTyped(g.server, target, method, registerPath, fullPath, handler, operationOptions, nil)
+}
+
+// GroupGet registers a typed GET handler under a route group.
+func GroupGet[I, O any](g *Group, path string, handler TypedHandler[I, O], operationOptions ...OperationOption) error {
+	return GroupRoute(g, MethodGet, path, handler, operationOptions...)
+}
+
+// GroupPost registers a typed POST handler under a route group.
+func GroupPost[I, O any](g *Group, path string, handler TypedHandler[I, O], operationOptions ...OperationOption) error {
+	return GroupRoute(g, MethodPost, path, handler, operationOptions...)
+}
+
+// GroupPut registers a typed PUT handler under a route group.
+func GroupPut[I, O any](g *Group, path string, handler TypedHandler[I, O], operationOptions ...OperationOption) error {
+	return GroupRoute(g, MethodPut, path, handler, operationOptions...)
+}
+
+// GroupPatch registers a typed PATCH handler under a route group.
+func GroupPatch[I, O any](g *Group, path string, handler TypedHandler[I, O], operationOptions ...OperationOption) error {
+	return GroupRoute(g, MethodPatch, path, handler, operationOptions...)
+}
+
+// GroupDelete registers a typed DELETE handler under a route group.
+func GroupDelete[I, O any](g *Group, path string, handler TypedHandler[I, O], operationOptions ...OperationOption) error {
+	return GroupRoute(g, MethodDelete, path, handler, operationOptions...)
+}
+
+// MustRoute registers a route and panics if registration fails.
+func MustRoute[I, O any](s ServerRuntime, method, path string, handler TypedHandler[I, O], operationOptions ...OperationOption) {
+	lo.Must0(Route(s, method, path, handler, operationOptions...))
+}
+
+// MustGet registers a GET route and panics if registration fails.
+func MustGet[I, O any](s ServerRuntime, path string, handler TypedHandler[I, O], operationOptions ...OperationOption) {
+	lo.Must0(Get(s, path, handler, operationOptions...))
+}
+
+// MustPost registers a POST route and panics if registration fails.
+func MustPost[I, O any](s ServerRuntime, path string, handler TypedHandler[I, O], operationOptions ...OperationOption) {
+	lo.Must0(Post(s, path, handler, operationOptions...))
+}
+
+// MustPut registers a PUT route and panics if registration fails.
+func MustPut[I, O any](s ServerRuntime, path string, handler TypedHandler[I, O], operationOptions ...OperationOption) {
+	lo.Must0(Put(s, path, handler, operationOptions...))
+}
+
+// MustPatch registers a PATCH route and panics if registration fails.
+func MustPatch[I, O any](s ServerRuntime, path string, handler TypedHandler[I, O], operationOptions ...OperationOption) {
+	lo.Must0(Patch(s, path, handler, operationOptions...))
+}
+
+// MustDelete registers a DELETE route and panics if registration fails.
+func MustDelete[I, O any](s ServerRuntime, path string, handler TypedHandler[I, O], operationOptions ...OperationOption) {
+	lo.Must0(Delete(s, path, handler, operationOptions...))
+}
+
+// MustHead registers a HEAD route and panics if registration fails.
+func MustHead[I, O any](s ServerRuntime, path string, handler TypedHandler[I, O], operationOptions ...OperationOption) {
+	lo.Must0(Head(s, path, handler, operationOptions...))
+}
+
+// MustOptions registers an OPTIONS route and panics if registration fails.
+func MustOptions[I, O any](s ServerRuntime, path string, handler TypedHandler[I, O], operationOptions ...OperationOption) {
+	lo.Must0(Options(s, path, handler, operationOptions...))
+}
+
+// MustGroupRoute registers a grouped route and panics if registration fails.
+func MustGroupRoute[I, O any](g *Group, method, path string, handler TypedHandler[I, O], operationOptions ...OperationOption) {
+	lo.Must0(GroupRoute(g, method, path, handler, operationOptions...))
+}
+
+// MustGroupGet registers a grouped GET route and panics if registration fails.
+func MustGroupGet[I, O any](g *Group, path string, handler TypedHandler[I, O], operationOptions ...OperationOption) {
+	lo.Must0(GroupGet(g, path, handler, operationOptions...))
+}
+
+// MustGroupPost registers a grouped POST route and panics if registration fails.
+func MustGroupPost[I, O any](g *Group, path string, handler TypedHandler[I, O], operationOptions ...OperationOption) {
+	lo.Must0(GroupPost(g, path, handler, operationOptions...))
+}
+
+// MustGroupPut registers a grouped PUT route and panics if registration fails.
+func MustGroupPut[I, O any](g *Group, path string, handler TypedHandler[I, O], operationOptions ...OperationOption) {
+	lo.Must0(GroupPut(g, path, handler, operationOptions...))
+}
+
+// MustGroupPatch registers a grouped PATCH route and panics if registration fails.
+func MustGroupPatch[I, O any](g *Group, path string, handler TypedHandler[I, O], operationOptions ...OperationOption) {
+	lo.Must0(GroupPatch(g, path, handler, operationOptions...))
+}
+
+// MustGroupDelete registers a grouped DELETE route and panics if registration fails.
+func MustGroupDelete[I, O any](g *Group, path string, handler TypedHandler[I, O], operationOptions ...OperationOption) {
+	lo.Must0(GroupDelete(g, path, handler, operationOptions...))
+}
+
+// registerTyped converts an httpx typed handler into a Huma operation registration.
+func registerTyped[I, O any](
+	s *Server,
+	api huma.API,
+	method, registerPath, fullPath string,
+	handler TypedHandler[I, O],
+	operationOptions []OperationOption,
+	policies []RoutePolicy[I, O],
+) error {
+	if s == nil {
+		return oops.In("httpx").
+			With("op", "register_route", "method", strings.ToUpper(method), "path", fullPath, "register_path", registerPath).
+			Wrapf(ErrRouteNotRegistered, "validate server")
+	}
+	if api == nil {
+		return oops.In("httpx").
+			With("op", "register_route", "method", strings.ToUpper(method), "path", fullPath, "register_path", registerPath).
+			Wrapf(ErrAdapterNotFound, "resolve adapter api")
+	}
+
+	wrappedHandler := applyRoutePolicies(withInputValidation(s, handler), policies)
+	op := newTypedOperation(method, registerPath, fullPath, operationOptions, policies)
+	handlerName := handlerName(handler)
+	applyOperationModifiers(&op, s.operationModifiers)
+	if s.logger != nil && s.logger.Enabled(context.Background(), slog.LevelDebug) {
+		s.logger.Debug("httpx route registration starting",
+			"method", method,
+			"path", fullPath,
+			"register_path", registerPath,
+			"operation_id", op.OperationID,
+			"handler", handlerName,
+			"policies", len(policies),
+		)
+	}
+
+	s.openAPIMu.Lock()
+	defer s.openAPIMu.Unlock()
+	if err := s.validateRouteRegistration(method, fullPath); err != nil {
+		if s.logger != nil {
+			s.logger.Error("httpx route registration failed",
+				"method", method,
+				"path", fullPath,
+				"error", err,
+			)
+		}
+		return oops.In("httpx").
+			With("op", "register_route", "method", strings.ToUpper(method), "path", fullPath, "register_path", registerPath, "operation_id", op.OperationID).
+			Wrapf(err, "validate route registration")
+	}
+	huma.Register(api, op, func(ctx context.Context, input *I) (*O, error) {
+		return wrappedHandler(ctx, input)
+	})
+
+	s.addRoute(RouteInfo{
+		Method:      method,
+		Path:        fullPath,
+		HandlerName: handlerName,
+		Tags:        routeTags(op.Tags),
+	})
+	if s.logger != nil && s.logger.Enabled(context.Background(), slog.LevelDebug) {
+		s.logger.Debug("httpx route registration completed",
+			"method", method,
+			"path", fullPath,
+			"operation_id", op.OperationID,
+		)
+	}
+
+	return nil
+}
+
+func newTypedOperation[I, O any](
+	method string,
+	registerPath string,
+	fullPath string,
+	operationOptions []OperationOption,
+	policies []RoutePolicy[I, O],
+) huma.Operation {
+	op := huma.Operation{
+		OperationID: defaultOperationID(method, fullPath),
+		Method:      method,
+		Path:        registerPath,
+	}
+	option.Apply(&op, operationOptions...)
+	applyPolicyOperations(&op, policies)
+	return op
+}
+
+func applyOperationModifiers(op *huma.Operation, modifiers collectionx.ConcurrentList[func(*huma.Operation)]) {
+	if op == nil || modifiers == nil {
+		return
+	}
+	modifiers.Range(func(_ int, modifier func(*huma.Operation)) bool {
+		if modifier != nil {
+			modifier(op)
+		}
+		return true
+	})
+}
+
+// handlerName returns a best-effort function name for diagnostics.
+func handlerName(fn any) string {
+	v := reflect.ValueOf(fn)
+	if !v.IsValid() || v.Kind() != reflect.Func {
+		return "unknown"
+	}
+
+	runtimeFn := runtime.FuncForPC(v.Pointer())
+	return lo.Ternary(runtimeFn != nil, lo.LastOr(strings.Split(runtimeFn.Name(), "/"), "unknown"), "unknown")
+}
+
+// defaultOperationID generates a stable fallback operation id from method and path.
+func defaultOperationID(method, path string) string {
+	cleanPath := strings.Trim(path, "/")
+	cleanPath = lo.Ternary(cleanPath == "", "root", cleanPath)
+	cleanPath = strings.NewReplacer("/", "-", "{", "", "}", "", ":", "").Replace(cleanPath)
+	return strings.ToLower(method) + "-" + cleanPath
+}
+
+func routeTags(tags []string) collectionx.List[string] {
+	if len(tags) == 0 {
+		return nil
+	}
+	return collectionx.NewListWithCapacity(len(tags), tags...)
+}

@@ -1,0 +1,114 @@
+package httpx_test
+
+import (
+	"context"
+	"fmt"
+	"net/http"
+	"strconv"
+	"testing"
+)
+
+type benchmarkPingOutput struct {
+	Body struct {
+		Message string `json:"message"`
+	}
+}
+
+func benchmarkServerWithPingRoute(b *testing.B) *Server {
+	b.Helper()
+
+	server := newServer()
+	err := Get(server, "/ping", func(_ context.Context, _ *struct{}) (*benchmarkPingOutput, error) {
+		out := &benchmarkPingOutput{}
+		out.Body.Message = "pong"
+		return out, nil
+	})
+	if err != nil {
+		b.Fatal(err)
+	}
+	return server
+}
+
+func benchmarkServerWithParameterizedRoutes(b *testing.B, total int) *Server {
+	b.Helper()
+
+	server := newServer()
+	for i := range total {
+		path := fmt.Sprintf("/resources/%d/items/{id}", i)
+		err := Get(server, path, func(_ context.Context, _ *struct{}) (*benchmarkPingOutput, error) {
+			out := &benchmarkPingOutput{}
+			out.Body.Message = "pong"
+			return out, nil
+		})
+		if err != nil {
+			b.Fatal(err)
+		}
+	}
+	return server
+}
+
+func BenchmarkServerRegisterGet(b *testing.B) {
+	b.ReportAllocs()
+	b.ResetTimer()
+
+	for i := range b.N {
+		server := newServer()
+		path := "/bench/" + strconv.Itoa(i)
+		err := Get(server, path, func(_ context.Context, _ *struct{}) (*benchmarkPingOutput, error) {
+			out := &benchmarkPingOutput{}
+			out.Body.Message = "ok"
+			return out, nil
+		})
+		if err != nil {
+			b.Fatal(err)
+		}
+	}
+}
+
+func BenchmarkServerServeGet(b *testing.B) {
+	server := benchmarkServerWithPingRoute(b)
+
+	b.ReportAllocs()
+	b.ResetTimer()
+
+	for range b.N {
+		req := newTestRequest(http.MethodGet, "/ping", nil)
+		w := serveRequest(b, server, req)
+		if w.Code != http.StatusOK {
+			b.Fatalf("unexpected status code: %d", w.Code)
+		}
+	}
+}
+
+func BenchmarkServerMatchParameterizedRoute(b *testing.B) {
+	server := benchmarkServerWithParameterizedRoutes(b, 2048)
+
+	b.ReportAllocs()
+	b.ResetTimer()
+
+	for range b.N {
+		route, ok := matchRoute(server, http.MethodGet, "/resources/1024/items/42")
+		if !ok {
+			b.Fatal("expected route to match")
+		}
+		if route.Path != "/resources/1024/items/{id}" {
+			b.Fatalf("unexpected route path: %s", route.Path)
+		}
+	}
+}
+
+func BenchmarkPathNormalizeAndJoin(b *testing.B) {
+	base := " /api/v1/ "
+	path := "users/{id}"
+
+	b.ReportAllocs()
+	b.ResetTimer()
+
+	for range b.N {
+		prefix := normalizeRoutePrefix(base)
+		fullPath := joinRoutePath(prefix, path)
+		if fullPath == "" {
+			b.Fatal("unexpected empty path")
+		}
+	}
+}

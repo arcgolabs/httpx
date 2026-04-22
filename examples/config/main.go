@@ -1,0 +1,91 @@
+// Package main demonstrates configuring httpx server, client, and context options.
+package main
+
+import (
+	"context"
+	"fmt"
+	"log/slog"
+	"os"
+	"time"
+
+	"github.com/DaiYuANg/arcgo/examples/httpx/shared"
+	"github.com/DaiYuANg/arcgo/pkg/randomport"
+	"github.com/arcgolabs/httpx"
+	"github.com/arcgolabs/httpx/adapter"
+	"github.com/arcgolabs/httpx/adapter/std"
+	"github.com/arcgolabs/httpx/options"
+	"github.com/go-chi/chi/v5/middleware"
+)
+
+type userOutput struct {
+	Body struct {
+		Users []string `json:"users"`
+	}
+}
+
+func main() {
+	logger, closeLogger, err := shared.NewLogger()
+	if err != nil {
+		panic(err)
+	}
+	slogLogger := logger
+
+	slogLogger.Info("config example section", slog.String("section", "server options + adapter options"))
+	serverOpts := options.DefaultServerOptions()
+	serverOpts.Logger = slogLogger
+	serverOpts.BasePath = "/api"
+	serverOpts.PrintRoutes = true
+	serverOpts.EnableValidation = true
+	serverOpts.HumaTitle = "ArcGo API"
+	serverOpts.HumaVersion = "1.0.0"
+	serverOpts.HumaDescription = "API Documentation"
+	serverOpts.EnablePanicRecover = true
+	serverOpts.EnableAccessLog = true
+
+	// OpenAPI info belongs to httpx; docs route exposure belongs to the host adapter.
+	router := chi.NewMux()
+	router.Use(middleware.Logger, middleware.Recoverer, middleware.RequestID)
+
+	stdAdapter := std.New(router, adapter.HumaOptions{
+		DocsPath:    "/docs",
+		OpenAPIPath: "/openapi.json",
+	})
+
+	serverBuild := serverOpts.Build()
+	serverBuild.Add(httpx.WithAdapter(stdAdapter))
+	server := httpx.New(serverBuild.Values()...)
+	httpx.MustGet(server, "/users", func(_ context.Context, _ *struct{}) (*userOutput, error) {
+		out := &userOutput{}
+		out.Body.Users = []string{"Alice", "Bob", "Charlie"}
+		return out, nil
+	}, huma.OperationTags("users"))
+
+	slogLogger.Info("config example section", slog.String("section", "http client options"))
+	clientOpts := &options.HTTPClientOptions{Timeout: 30 * time.Second}
+	client := clientOpts.Build()
+	slogLogger.Info("http client configured", slog.Duration("timeout", client.Timeout))
+
+	slogLogger.Info("config example section", slog.String("section", "context options"))
+	ctxOpts := &options.ContextOptions{Timeout: 5 * time.Second}
+	ctxOpts = options.WithContextValueOpt(ctxOpts, "request_id", "12345")
+	ctx, cancel := ctxOpts.Build()
+	slogLogger.Info("context configured", slog.Any("request_id", ctx.Value("request_id")))
+	cancel()
+
+	port := randomport.MustFind()
+	addr := fmt.Sprintf(":%d", port)
+	slogLogger.Info("example server starting",
+		slog.String("example", "config"),
+		slog.String("address", addr),
+		slog.String("openapi", fmt.Sprintf("http://localhost%s/openapi.json", addr)),
+		slog.String("docs", fmt.Sprintf("http://localhost%s/docs", addr)),
+		slog.Any("routes", server.GetRoutes()),
+	)
+
+	if err := server.ListenPort(port); err != nil {
+		slogLogger.Error("server exited with error", slog.String("error", err.Error()))
+		closeLogger()
+		os.Exit(1)
+	}
+	closeLogger()
+}

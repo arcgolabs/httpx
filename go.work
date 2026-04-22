@@ -1,0 +1,14 @@
+go 1.26.2
+
+use (
+	.
+	adapter/echo
+	adapter/fiber
+	adapter/gin
+	adapter/std
+	dix
+	examples
+	fx
+	middleware
+	websocket
+)
