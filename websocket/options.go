@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/DaiYuANg/arcgo/pkg/option"
+	"github.com/arcgolabs/pkg/option"
 )
 
 // Context aliases context.Context for WebSocket handlers and connections.

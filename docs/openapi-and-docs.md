@@ -24,9 +24,9 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/DaiYuANg/arcgo/httpx"
-	"github.com/DaiYuANg/arcgo/httpx/adapter"
-	"github.com/DaiYuANg/arcgo/httpx/adapter/std"
+	"github.com/arcgolabs/httpx"
+	"github.com/arcgolabs/httpx/adapter"
+	"github.com/arcgolabs/httpx/adapter/std"
 	"github.com/go-chi/chi/v5"
 )
 
@@ -61,5 +61,4 @@ func main() {
 ## Related
 
 - [Getting Started](./getting-started)
-- OpenAPI-heavy runnable samples: [examples/httpx/endpoint](https://github.com/DaiYuANg/arcgo/tree/main/examples/httpx/endpoint), [examples/httpx/organization](https://github.com/DaiYuANg/arcgo/tree/main/examples/httpx/organization)
-
+- OpenAPI-heavy runnable samples: [examples/endpoint](https://github.com/arcgolabs/httpx/tree/main/examples/endpoint), [examples/organization](https://github.com/arcgolabs/httpx/tree/main/examples/organization)

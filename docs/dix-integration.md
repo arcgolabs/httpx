@@ -57,4 +57,4 @@ Do not use it if:
 
 ## Example
 
-- Runnable wiring example: [examples/dix/backend/http](https://github.com/DaiYuANg/arcgo/tree/main/examples/dix/backend/http)
+- Runnable wiring example: [github.com/arcgolabs/dix](https://github.com/arcgolabs/dix)

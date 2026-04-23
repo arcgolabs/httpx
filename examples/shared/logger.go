@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 
-	"github.com/DaiYuANg/arcgo/logx"
+	"github.com/arcgolabs/logx"
 )
 
 // NewLogger builds a common example logger and returns a cleanup function.

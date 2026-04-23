@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	collectionmapping "github.com/DaiYuANg/arcgo/collectionx/mapping"
+	collectionmapping "github.com/arcgolabs/collectionx/mapping"
 )
 
 // User is the demo user model returned by the shared example service.

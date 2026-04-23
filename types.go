@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/DaiYuANg/arcgo/collectionx"
+	"github.com/arcgolabs/collectionx"
 	"github.com/danielgtaylor/huma/v2"
 	humaconditional "github.com/danielgtaylor/huma/v2/conditional"
 	humasse "github.com/danielgtaylor/huma/v2/sse"

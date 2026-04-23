@@ -19,7 +19,7 @@ This page shows a minimal server with:
 ## 1) Install
 
 ```bash
-go get github.com/DaiYuANg/arcgo/httpx@latest
+go get github.com/arcgolabs/httpx@latest
 go get github.com/go-chi/chi/v5
 ```
 
@@ -31,9 +31,9 @@ package main
 import (
 	"context"
 
-	"github.com/DaiYuANg/arcgo/httpx"
-	"github.com/DaiYuANg/arcgo/httpx/adapter"
-	"github.com/DaiYuANg/arcgo/httpx/adapter/std"
+	"github.com/arcgolabs/httpx"
+	"github.com/arcgolabs/httpx/adapter"
+	"github.com/arcgolabs/httpx/adapter/std"
 	"github.com/go-chi/chi/v5"
 )
 

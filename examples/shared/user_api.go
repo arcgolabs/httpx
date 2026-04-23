@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/arcgolabs/httpx"
+	"github.com/danielgtaylor/huma/v2"
 )
 
 type listUsersInput struct {

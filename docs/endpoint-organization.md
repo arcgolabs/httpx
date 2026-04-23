@@ -117,4 +117,4 @@ These are applied through the existing group-level defaults. The runtime model s
 
 ## Example
 
-- Runnable example: [examples/httpx/endpoint](https://github.com/DaiYuANg/arcgo/tree/main/examples/httpx/endpoint)
+- Runnable example: [examples/endpoint](https://github.com/arcgolabs/httpx/tree/main/examples/endpoint)

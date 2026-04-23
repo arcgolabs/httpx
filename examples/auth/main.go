@@ -7,11 +7,12 @@ import (
 	"log/slog"
 	"os"
 
-	"github.com/DaiYuANg/arcgo/examples/httpx/shared"
-	"github.com/DaiYuANg/arcgo/pkg/randomport"
+	"github.com/arcgolabs/httpx/examples/shared"
 	"github.com/arcgolabs/httpx"
 	"github.com/arcgolabs/httpx/adapter"
 	"github.com/arcgolabs/httpx/adapter/std"
+	"github.com/arcgolabs/pkg/randomport"
+	"github.com/danielgtaylor/huma/v2"
 )
 
 type profileInput struct {

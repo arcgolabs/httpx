@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	ginadapter "github.com/arcgolabs/httpx/adapter/gin"
+	"github.com/danielgtaylor/huma/v2"
 	ginframework "github.com/gin-gonic/gin"
 )
 

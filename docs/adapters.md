@@ -27,9 +27,9 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/DaiYuANg/arcgo/httpx"
-	"github.com/DaiYuANg/arcgo/httpx/adapter"
-	"github.com/DaiYuANg/arcgo/httpx/adapter/std"
+	"github.com/arcgolabs/httpx"
+	"github.com/arcgolabs/httpx/adapter"
+	"github.com/arcgolabs/httpx/adapter/std"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 )
@@ -65,8 +65,7 @@ func main() {
 
 ## Runnable adapter examples (repository)
 
-- [examples/httpx/std](https://github.com/DaiYuANg/arcgo/tree/main/examples/httpx/std)
-- [examples/httpx/gin](https://github.com/DaiYuANg/arcgo/tree/main/examples/httpx/gin)
-- [examples/httpx/echo](https://github.com/DaiYuANg/arcgo/tree/main/examples/httpx/echo)
-- [examples/httpx/fiber](https://github.com/DaiYuANg/arcgo/tree/main/examples/httpx/fiber)
-
+- [examples/std](https://github.com/arcgolabs/httpx/tree/main/examples/std)
+- [examples/gin](https://github.com/arcgolabs/httpx/tree/main/examples/gin)
+- [examples/echo](https://github.com/arcgolabs/httpx/tree/main/examples/echo)
+- [examples/fiber](https://github.com/arcgolabs/httpx/tree/main/examples/fiber)

@@ -1,7 +1,7 @@
 package fx
 
 import (
-	pkgfx "github.com/DaiYuANg/arcgo/pkg/fx"
+	pkgfx "github.com/arcgolabs/pkg/fx"
 	"github.com/arcgolabs/httpx"
 	"go.uber.org/fx"
 )

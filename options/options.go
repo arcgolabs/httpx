@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/DaiYuANg/arcgo/collectionx"
-	"github.com/DaiYuANg/arcgo/pkg/option"
+	"github.com/arcgolabs/collectionx"
+	"github.com/arcgolabs/pkg/option"
 	"github.com/arcgolabs/httpx"
 	"github.com/arcgolabs/httpx/adapter"
 	"github.com/go-playground/validator/v10"

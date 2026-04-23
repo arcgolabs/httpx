@@ -6,8 +6,8 @@ import (
 	"log/slog"
 	"os"
 
-	"github.com/DaiYuANg/arcgo/examples/httpx/shared"
-	"github.com/DaiYuANg/arcgo/pkg/randomport"
+	"github.com/arcgolabs/httpx/examples/shared"
+	"github.com/arcgolabs/pkg/randomport"
 	"github.com/arcgolabs/httpx/adapter"
 	"github.com/arcgolabs/httpx/adapter/gin"
 	ginFramework "github.com/gin-gonic/gin"

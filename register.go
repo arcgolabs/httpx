@@ -9,8 +9,8 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/DaiYuANg/arcgo/collectionx"
-	"github.com/DaiYuANg/arcgo/pkg/option"
+	"github.com/arcgolabs/collectionx"
+	"github.com/arcgolabs/pkg/option"
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/samber/lo"
 	"github.com/samber/oops"

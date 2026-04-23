@@ -6,7 +6,7 @@ It gives you a stable **server/group/endpoint** API surface across multiple runt
 ## Install
 
 ```bash
-go get github.com/DaiYuANg/arcgo/httpx@latest
+go get github.com/arcgolabs/httpx@latest
 ```
 
 ## Current capabilities
@@ -26,16 +26,16 @@ go get github.com/DaiYuANg/arcgo/httpx@latest
 
 ## Package layout
 
-- Core: `github.com/DaiYuANg/arcgo/httpx`
+- Core: `github.com/arcgolabs/httpx`
 - Adapters:
-    - `github.com/DaiYuANg/arcgo/httpx/adapter/std`
-    - `github.com/DaiYuANg/arcgo/httpx/adapter/gin`
-    - `github.com/DaiYuANg/arcgo/httpx/adapter/echo`
-    - `github.com/DaiYuANg/arcgo/httpx/adapter/fiber`
+    - `github.com/arcgolabs/httpx/adapter/std`
+    - `github.com/arcgolabs/httpx/adapter/gin`
+    - `github.com/arcgolabs/httpx/adapter/echo`
+    - `github.com/arcgolabs/httpx/adapter/fiber`
 - Optional:
-    - `github.com/DaiYuANg/arcgo/httpx/middleware`
-    - `github.com/DaiYuANg/arcgo/httpx/dix`
-    - `github.com/DaiYuANg/arcgo/httpx/websocket`
+    - `github.com/arcgolabs/httpx/middleware`
+    - `github.com/arcgolabs/httpx/dix`
+    - `github.com/arcgolabs/httpx/websocket`
 
 ## Documentation map (recommended reading)
 
@@ -48,21 +48,21 @@ go get github.com/DaiYuANg/arcgo/httpx@latest
 
 ## Runnable examples (repository)
 
-- Quickstart: [examples/httpx/quickstart](https://github.com/DaiYuANg/arcgo/tree/main/examples/httpx/quickstart)
+- Quickstart: [examples/quickstart](https://github.com/arcgolabs/httpx/tree/main/examples/quickstart)
 - Adapters:
-    - [examples/httpx/std](https://github.com/DaiYuANg/arcgo/tree/main/examples/httpx/std)
-    - [examples/httpx/gin](https://github.com/DaiYuANg/arcgo/tree/main/examples/httpx/gin)
-    - [examples/httpx/echo](https://github.com/DaiYuANg/arcgo/tree/main/examples/httpx/echo)
-    - [examples/httpx/fiber](https://github.com/DaiYuANg/arcgo/tree/main/examples/httpx/fiber)
+    - [examples/std](https://github.com/arcgolabs/httpx/tree/main/examples/std)
+    - [examples/gin](https://github.com/arcgolabs/httpx/tree/main/examples/gin)
+    - [examples/echo](https://github.com/arcgolabs/httpx/tree/main/examples/echo)
+    - [examples/fiber](https://github.com/arcgolabs/httpx/tree/main/examples/fiber)
 - Auth / organization:
-    - [examples/httpx/auth](https://github.com/DaiYuANg/arcgo/tree/main/examples/httpx/auth)
-    - [examples/httpx/organization](https://github.com/DaiYuANg/arcgo/tree/main/examples/httpx/organization)
+    - [examples/auth](https://github.com/arcgolabs/httpx/tree/main/examples/auth)
+    - [examples/organization](https://github.com/arcgolabs/httpx/tree/main/examples/organization)
 - Streaming:
-    - SSE: [examples/httpx/sse](https://github.com/DaiYuANg/arcgo/tree/main/examples/httpx/sse)
-    - Websocket: [examples/httpx/websocket](https://github.com/DaiYuANg/arcgo/tree/main/examples/httpx/websocket)
-- Conditional requests: [examples/httpx/conditional](https://github.com/DaiYuANg/arcgo/tree/main/examples/httpx/conditional)
-- Endpoint registration: [examples/httpx/endpoint](https://github.com/DaiYuANg/arcgo/tree/main/examples/httpx/endpoint)
-- `dix` backend wiring: [examples/dix/backend/http](https://github.com/DaiYuANg/arcgo/tree/main/examples/dix/backend/http)
+    - SSE: [examples/sse](https://github.com/arcgolabs/httpx/tree/main/examples/sse)
+    - Websocket: [examples/websocket](https://github.com/arcgolabs/httpx/tree/main/examples/websocket)
+- Conditional requests: [examples/conditional](https://github.com/arcgolabs/httpx/tree/main/examples/conditional)
+- Endpoint registration: [examples/endpoint](https://github.com/arcgolabs/httpx/tree/main/examples/endpoint)
+- `dix` backend wiring: [github.com/arcgolabs/dix](https://github.com/arcgolabs/dix)
 
 ## Positioning (how to think about it)
 

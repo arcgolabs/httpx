@@ -5,7 +5,7 @@ import (
 	"log/slog"
 	"strings"
 
-	"github.com/DaiYuANg/arcgo/pkg/option"
+	"github.com/arcgolabs/pkg/option"
 	"github.com/danielgtaylor/huma/v2"
 	humasse "github.com/danielgtaylor/huma/v2/sse"
 	"github.com/samber/lo"

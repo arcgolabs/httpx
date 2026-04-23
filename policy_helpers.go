@@ -1,7 +1,7 @@
 package httpx
 
 import (
-	"github.com/DaiYuANg/arcgo/pkg/option"
+	"github.com/arcgolabs/pkg/option"
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/samber/lo"
 )

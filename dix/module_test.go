@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	di "github.com/DaiYuANg/arcgo/dix"
+	di "github.com/arcgolabs/dix"
 	"github.com/arcgolabs/httpx"
 	httpxdix "github.com/arcgolabs/httpx/dix"
 	"github.com/danielgtaylor/huma/v2"

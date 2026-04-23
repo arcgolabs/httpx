@@ -6,9 +6,9 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/DaiYuANg/arcgo/collectionx/list"
-	"github.com/DaiYuANg/arcgo/collectionx/mapping"
-	"github.com/DaiYuANg/arcgo/pkg/option"
+	"github.com/arcgolabs/collectionx/list"
+	"github.com/arcgolabs/collectionx/mapping"
+	"github.com/arcgolabs/pkg/option"
 	"github.com/arcgolabs/httpx/adapter"
 	"github.com/arcgolabs/httpx/adapter/std"
 	"github.com/danielgtaylor/huma/v2"

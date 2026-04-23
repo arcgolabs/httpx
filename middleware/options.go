@@ -3,7 +3,7 @@ package middleware
 import (
 	"net/http"
 
-	"github.com/DaiYuANg/arcgo/pkg/option"
+	"github.com/arcgolabs/pkg/option"
 	"github.com/arcgolabs/httpx"
 )
 

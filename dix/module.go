@@ -5,9 +5,9 @@ import (
 	"log/slog"
 	"strings"
 
-	"github.com/DaiYuANg/arcgo/collectionx"
-	"github.com/DaiYuANg/arcgo/dix"
-	"github.com/DaiYuANg/arcgo/pkg/option"
+	"github.com/arcgolabs/collectionx"
+	"github.com/arcgolabs/dix"
+	"github.com/arcgolabs/pkg/option"
 	"github.com/arcgolabs/httpx"
 	"github.com/samber/oops"
 )
