@@ -3,7 +3,7 @@ package httpx
 import (
 	"maps"
 
-	"github.com/arcgolabs/collectionx"
+	"github.com/arcgolabs/collectionx/list"
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/samber/lo"
 )
@@ -73,7 +73,7 @@ func expandTags(tags OpenAPITags) []string {
 	if tags.IsEmpty() {
 		return nil
 	}
-	return collectionx.FilterList(tags, func(_ int, tag string) bool {
+	return list.FilterList(tags, func(_ int, tag string) bool {
 		return tag != ""
 	}).Values()
 }
@@ -82,7 +82,7 @@ func expandTagDefinitions(tags OpenAPITagDefinitions) []*huma.Tag {
 	if tags.IsEmpty() {
 		return nil
 	}
-	return collectionx.FilterMapList(tags, func(_ int, tag *huma.Tag) (*huma.Tag, bool) {
+	return list.FilterMapList(tags, func(_ int, tag *huma.Tag) (*huma.Tag, bool) {
 		if tag == nil {
 			return nil, false
 		}
@@ -94,7 +94,7 @@ func expandParameters(params OpenAPIParameters) []*huma.Param {
 	if params.IsEmpty() {
 		return nil
 	}
-	return collectionx.FilterMapList(params, func(_ int, param *huma.Param) (*huma.Param, bool) {
+	return list.FilterMapList(params, func(_ int, param *huma.Param) (*huma.Param, bool) {
 		if param == nil {
 			return nil, false
 		}
@@ -113,7 +113,7 @@ func expandSecuritySchemes(schemes OpenAPISecuritySchemes) []lo.Entry[string, *h
 	if schemes.IsEmpty() {
 		return nil
 	}
-	entries := collectionx.NewListWithCapacity[lo.Entry[string, *huma.SecurityScheme]](schemes.Len())
+	entries := list.NewListWithCapacity[lo.Entry[string, *huma.SecurityScheme]](schemes.Len())
 	schemes.Range(func(name string, scheme *huma.SecurityScheme) bool {
 		if name != "" && scheme != nil {
 			entries.Add(lo.Entry[string, *huma.SecurityScheme]{
@@ -130,7 +130,7 @@ func expandSecurityRequirements(requirements OpenAPISecurityRequirements) []map[
 	if requirements.IsEmpty() {
 		return nil
 	}
-	return collectionx.FilterMapList(requirements, func(_ int, req OpenAPISecurityRequirement) (map[string][]string, bool) {
+	return list.FilterMapList(requirements, func(_ int, req OpenAPISecurityRequirement) (map[string][]string, bool) {
 		expanded := expandSecurityRequirement(req)
 		return expanded, len(expanded) > 0
 	}).Values()

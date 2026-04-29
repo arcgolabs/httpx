@@ -4,7 +4,8 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/arcgolabs/collectionx"
+	"github.com/arcgolabs/collectionx/list"
+	"github.com/arcgolabs/collectionx/mapping"
 	"github.com/danielgtaylor/huma/v2"
 	humaconditional "github.com/danielgtaylor/huma/v2/conditional"
 	humasse "github.com/danielgtaylor/huma/v2/sse"
@@ -31,11 +32,11 @@ const (
 
 // RouteInfo describes a registered route for diagnostics and tests.
 type RouteInfo struct {
-	Method      string                   `json:"method"`
-	Path        string                   `json:"path"`
-	HandlerName string                   `json:"handler_name"`
-	Comment     string                   `json:"comment,omitempty"`
-	Tags        collectionx.List[string] `json:"tags,omitempty"`
+	Method      string             `json:"method"`
+	Path        string             `json:"path"`
+	HandlerName string             `json:"handler_name"`
+	Comment     string             `json:"comment,omitempty"`
+	Tags        *list.List[string] `json:"tags,omitempty"`
 }
 
 // String returns related data.
@@ -63,44 +64,44 @@ type OperationOption func(*huma.Operation)
 
 // OpenAPI collection aliases keep public config typed on collectionx.
 type (
-	OpenAPITags                 = collectionx.List[string]
-	OpenAPITagDefinitions       = collectionx.List[*huma.Tag]
-	OpenAPIParameters           = collectionx.List[*huma.Param]
-	OpenAPIExtensions           = collectionx.Map[string, any]
-	OpenAPISecurityScopes       = collectionx.List[string]
-	OpenAPISecurityRequirement  = collectionx.Map[string, OpenAPISecurityScopes]
-	OpenAPISecurityRequirements = collectionx.List[OpenAPISecurityRequirement]
-	OpenAPISecuritySchemes      = collectionx.Map[string, *huma.SecurityScheme]
+	OpenAPITags                 = *list.List[string]
+	OpenAPITagDefinitions       = *list.List[*huma.Tag]
+	OpenAPIParameters           = *list.List[*huma.Param]
+	OpenAPIExtensions           = *mapping.Map[string, any]
+	OpenAPISecurityScopes       = *list.List[string]
+	OpenAPISecurityRequirement  = *mapping.Map[string, OpenAPISecurityScopes]
+	OpenAPISecurityRequirements = *list.List[OpenAPISecurityRequirement]
+	OpenAPISecuritySchemes      = *mapping.Map[string, *huma.SecurityScheme]
 )
 
 // Tags creates an OpenAPI tag list backed by collectionx.
 func Tags(values ...string) OpenAPITags {
-	return collectionx.NewList(values...)
+	return list.NewList(values...)
 }
 
 // TagDefinitions creates OpenAPI tag metadata definitions backed by collectionx.
 func TagDefinitions(values ...*huma.Tag) OpenAPITagDefinitions {
-	return collectionx.NewList(values...)
+	return list.NewList(values...)
 }
 
 // Parameters creates an OpenAPI parameter list backed by collectionx.
 func Parameters(values ...*huma.Param) OpenAPIParameters {
-	return collectionx.NewList(values...)
+	return list.NewList(values...)
 }
 
 // Extensions creates an OpenAPI extension map backed by collectionx.
 func Extensions(values map[string]any) OpenAPIExtensions {
-	return collectionx.NewMapFrom(values)
+	return mapping.NewMapFrom(values)
 }
 
 // SecurityScopes creates an OpenAPI scope list backed by collectionx.
 func SecurityScopes(values ...string) OpenAPISecurityScopes {
-	return collectionx.NewList(values...)
+	return list.NewList(values...)
 }
 
 // SecurityRequirement creates one OpenAPI security requirement entry.
 func SecurityRequirement(name string, scopes ...string) OpenAPISecurityRequirement {
-	requirement := collectionx.NewMap[string, OpenAPISecurityScopes]()
+	requirement := mapping.NewMap[string, OpenAPISecurityScopes]()
 	if name != "" {
 		requirement.Set(name, SecurityScopes(scopes...))
 	}
@@ -109,7 +110,7 @@ func SecurityRequirement(name string, scopes ...string) OpenAPISecurityRequireme
 
 // SecurityRequirementMap creates one OpenAPI security requirement from a built-in map.
 func SecurityRequirementMap(values map[string][]string) OpenAPISecurityRequirement {
-	requirement := collectionx.NewMapWithCapacity[string, OpenAPISecurityScopes](len(values))
+	requirement := mapping.NewMapWithCapacity[string, OpenAPISecurityScopes](len(values))
 	lo.ForEach(lo.Entries(values), func(entry lo.Entry[string, []string], _ int) {
 		if entry.Key == "" {
 			return
@@ -121,12 +122,12 @@ func SecurityRequirementMap(values map[string][]string) OpenAPISecurityRequireme
 
 // SecurityRequirements creates a list of OpenAPI security requirements backed by collectionx.
 func SecurityRequirements(values ...OpenAPISecurityRequirement) OpenAPISecurityRequirements {
-	return collectionx.NewList(values...)
+	return list.NewList(values...)
 }
 
 // SecuritySchemes creates an OpenAPI security scheme map backed by collectionx.
 func SecuritySchemes(values map[string]*huma.SecurityScheme) OpenAPISecuritySchemes {
-	return collectionx.NewMapFrom(values)
+	return mapping.NewMapFrom(values)
 }
 
 // SecurityOptions configures OpenAPI security schemes and default requirements.

@@ -5,45 +5,46 @@ import (
 	"log/slog"
 	"strings"
 
-	"github.com/arcgolabs/collectionx"
+	"github.com/arcgolabs/collectionx/list"
+	"github.com/arcgolabs/collectionx/mapping"
 	"github.com/samber/lo"
 	"github.com/samber/oops"
 )
 
 // GetRoutes returns related data.
-func (s *Server) GetRoutes() collectionx.List[RouteInfo] {
+func (s *Server) GetRoutes() *list.List[RouteInfo] {
 	if s == nil {
-		return collectionx.NewList[RouteInfo]()
+		return list.NewList[RouteInfo]()
 	}
-	return collectionx.NewList(s.routesSnapshot()...)
+	return list.NewList(s.routesSnapshot()...)
 }
 
 // GetRoutesByMethod returns routes matching the given HTTP method.
-func (s *Server) GetRoutesByMethod(method string) collectionx.List[RouteInfo] {
+func (s *Server) GetRoutesByMethod(method string) *list.List[RouteInfo] {
 	method = strings.ToUpper(method)
 	if s == nil || method == "" {
-		return collectionx.NewList[RouteInfo]()
+		return list.NewList[RouteInfo]()
 	}
-	return collectionx.NewList(s.routesByMethod.GetCopy(method)...)
+	return list.NewList(s.routesByMethod.GetCopy(method)...)
 }
 
 // GetRoutesGroupedByMethod returns a stable snapshot of routes keyed by HTTP method.
-func (s *Server) GetRoutesGroupedByMethod() collectionx.MultiMap[string, RouteInfo] {
+func (s *Server) GetRoutesGroupedByMethod() *mapping.MultiMap[string, RouteInfo] {
 	if s == nil {
-		return collectionx.NewMultiMap[string, RouteInfo]()
+		return mapping.NewMultiMap[string, RouteInfo]()
 	}
 	return s.routesByMethod.Snapshot()
 }
 
 // GetRoutesByPath returns routes whose path starts with the given prefix.
-func (s *Server) GetRoutesByPath(prefix string) collectionx.List[RouteInfo] {
+func (s *Server) GetRoutesByPath(prefix string) *list.List[RouteInfo] {
 	if s == nil {
-		return collectionx.NewList[RouteInfo]()
+		return list.NewList[RouteInfo]()
 	}
 	if prefix == "" {
 		return s.GetRoutes()
 	}
-	return collectionx.NewList(lo.Filter(s.routesSnapshot(), func(route RouteInfo, _ int) bool {
+	return list.NewList(lo.Filter(s.routesSnapshot(), func(route RouteInfo, _ int) bool {
 		return strings.HasPrefix(route.Path, prefix)
 	})...)
 }

@@ -4,7 +4,8 @@ import (
 	"context"
 	"log/slog"
 
-	"github.com/arcgolabs/collectionx"
+	"github.com/arcgolabs/collectionx/list"
+	"github.com/arcgolabs/collectionx/mapping"
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/go-playground/validator/v10"
 )
@@ -38,10 +39,10 @@ type ServerRuntime interface {
 	RegisterGlobalHeader(*huma.Param)
 
 	Group(prefix string) *Group
-	GetRoutes() collectionx.List[RouteInfo]
-	GetRoutesByMethod(method string) collectionx.List[RouteInfo]
-	GetRoutesGroupedByMethod() collectionx.MultiMap[string, RouteInfo]
-	GetRoutesByPath(prefix string) collectionx.List[RouteInfo]
+	GetRoutes() *list.List[RouteInfo]
+	GetRoutesByMethod(method string) *list.List[RouteInfo]
+	GetRoutesGroupedByMethod() *mapping.MultiMap[string, RouteInfo]
+	GetRoutesByPath(prefix string) *list.List[RouteInfo]
 	MatchRoute(method, path string) (RouteInfo, bool)
 	HasRoute(method, path string) bool
 	RouteCount() int

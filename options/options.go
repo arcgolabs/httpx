@@ -7,10 +7,10 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/arcgolabs/collectionx"
-	"github.com/arcgolabs/pkg/option"
+	"github.com/arcgolabs/collectionx/list"
 	"github.com/arcgolabs/httpx"
 	"github.com/arcgolabs/httpx/adapter"
+	"github.com/arcgolabs/pkg/option"
 	"github.com/go-playground/validator/v10"
 	"github.com/samber/lo"
 )
@@ -119,8 +119,8 @@ func WithAccessLog(enabled bool) ServerOption {
 }
 
 // Build converts `ServerOptions` into `httpx.ServerOption` values.
-func (o *ServerOptions) Build() collectionx.List[httpx.ServerOption] {
-	opts := collectionx.NewList[httpx.ServerOption](
+func (o *ServerOptions) Build() *list.List[httpx.ServerOption] {
+	opts := list.NewList[httpx.ServerOption](
 		httpx.WithLogger(o.Logger),
 		httpx.WithPrintRoutes(o.PrintRoutes),
 	)
@@ -233,7 +233,7 @@ func WithContextValueOpt(o *ContextOptions, key string, value any) *ContextOptio
 	return o
 }
 
-func appendValidationBuildOption(opts collectionx.List[httpx.ServerOption], o *ServerOptions) {
+func appendValidationBuildOption(opts *list.List[httpx.ServerOption], o *ServerOptions) {
 	if o.Validator != nil {
 		opts.Add(httpx.WithValidator(o.Validator))
 		return

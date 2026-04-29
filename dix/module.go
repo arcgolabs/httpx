@@ -5,10 +5,10 @@ import (
 	"log/slog"
 	"strings"
 
-	"github.com/arcgolabs/collectionx"
+	"github.com/arcgolabs/collectionx/list"
 	"github.com/arcgolabs/dix"
-	"github.com/arcgolabs/pkg/option"
 	"github.com/arcgolabs/httpx"
+	"github.com/arcgolabs/pkg/option"
 	"github.com/samber/oops"
 )
 
@@ -29,13 +29,13 @@ func NewModule(name string, provider dix.ProviderFunc, opts ...ModuleOption) dix
 	}
 	option.Apply(&cfg, opts...)
 
-	moduleOpts := collectionx.NewListWithCapacity[dix.ModuleOption](len(cfg.moduleOptions) + 3)
+	moduleOpts := list.NewListWithCapacity[dix.ModuleOption](len(cfg.moduleOptions) + 3)
 	if len(cfg.imports) > 0 {
 		moduleOpts.Add(dix.Imports(cfg.imports...))
 	}
 	moduleOpts.Add(dix.Providers(provider))
 
-	hooks := collectionx.NewListWithCapacity[dix.HookFunc](len(cfg.hooks) + 1)
+	hooks := list.NewListWithCapacity[dix.HookFunc](len(cfg.hooks) + 1)
 	if cfg.includeShutdown {
 		hooks.Add(Shutdown())
 	}

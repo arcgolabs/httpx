@@ -9,7 +9,7 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/arcgolabs/collectionx"
+	"github.com/arcgolabs/collectionx/list"
 	"github.com/arcgolabs/pkg/option"
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/samber/lo"
@@ -264,7 +264,7 @@ func newTypedOperation[I, O any](
 	return op
 }
 
-func applyOperationModifiers(op *huma.Operation, modifiers collectionx.ConcurrentList[func(*huma.Operation)]) {
+func applyOperationModifiers(op *huma.Operation, modifiers *list.ConcurrentList[func(*huma.Operation)]) {
 	if op == nil || modifiers == nil {
 		return
 	}
@@ -295,9 +295,9 @@ func defaultOperationID(method, path string) string {
 	return strings.ToLower(method) + "-" + cleanPath
 }
 
-func routeTags(tags []string) collectionx.List[string] {
+func routeTags(tags []string) *list.List[string] {
 	if len(tags) == 0 {
 		return nil
 	}
-	return collectionx.NewListWithCapacity(len(tags), tags...)
+	return list.NewListWithCapacity(len(tags), tags...)
 }
