@@ -73,7 +73,7 @@ func expandTags(tags OpenAPITags) []string {
 	if tags.IsEmpty() {
 		return nil
 	}
-	return list.FilterList(tags, func(_ int, tag string) bool {
+	return tags.Where(func(_ int, tag string) bool {
 		return tag != ""
 	}).Values()
 }
@@ -106,7 +106,7 @@ func expandExtensions(values OpenAPIExtensions) map[string]any {
 	if values.IsEmpty() {
 		return nil
 	}
-	return cloneExtensions(values.All())
+	return values.All()
 }
 
 func expandSecuritySchemes(schemes OpenAPISecuritySchemes) []lo.Entry[string, *huma.SecurityScheme] {

@@ -173,13 +173,13 @@ func normalizeContentTypes(values []string, fallback string) []string {
 		return []string{fallback}
 	}
 
-	ordered := set.NewOrderedSet[string]()
-	lo.ForEach(lo.FilterMap(values, func(value string, _ int) (string, bool) {
+	ordered := set.NewOrderedSetWithCapacity[string](len(values))
+	for _, value := range values {
 		trimmed := strings.TrimSpace(value)
-		return trimmed, trimmed != ""
-	}), func(value string, _ int) {
-		ordered.Add(value)
-	})
+		if trimmed != "" {
+			ordered.Add(trimmed)
+		}
+	}
 	normalized := ordered.Values()
 	if len(normalized) == 0 {
 		return []string{fallback}

@@ -4,7 +4,7 @@ go 1.26.2
 
 require (
 	github.com/danielgtaylor/huma/v2 v2.37.3
-	github.com/gofiber/fiber/v2 v2.52.12
+	github.com/gofiber/fiber/v2 v2.52.13
 	github.com/samber/oops v1.21.0
 	github.com/stretchr/testify v1.11.1
 )

@@ -44,9 +44,9 @@ func (s *Server) GetRoutesByPath(prefix string) *list.List[RouteInfo] {
 	if prefix == "" {
 		return s.GetRoutes()
 	}
-	return list.NewList(lo.Filter(s.routesSnapshot(), func(route RouteInfo, _ int) bool {
+	return s.routes.Where(func(_ int, route RouteInfo) bool {
 		return strings.HasPrefix(route.Path, prefix)
-	})...)
+	})
 }
 
 // MatchRoute resolves a request path to the registered route template when possible.

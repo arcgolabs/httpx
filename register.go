@@ -268,11 +268,10 @@ func applyOperationModifiers(op *huma.Operation, modifiers *list.ConcurrentList[
 	if op == nil || modifiers == nil {
 		return
 	}
-	modifiers.Range(func(_ int, modifier func(*huma.Operation)) bool {
+	modifiers.Each(func(_ int, modifier func(*huma.Operation)) {
 		if modifier != nil {
 			modifier(op)
 		}
-		return true
 	})
 }
 
