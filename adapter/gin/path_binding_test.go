@@ -1,0 +1,42 @@
+//go:build !no_gin
+
+package gin_test
+
+import (
+	"context"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+
+	httpx "github.com/arcgolabs/httpx"
+	ginadapter "github.com/arcgolabs/httpx/adapter/gin"
+	"github.com/stretchr/testify/assert"
+)
+
+func TestAdapter_StrongTypedPathBinding(t *testing.T) {
+	adapter := ginadapter.New(nil)
+	server := httpx.New(httpx.WithAdapter(adapter))
+
+	type in struct {
+		UserID int `path:"id"`
+	}
+	type out struct {
+		Body struct {
+			ID int `json:"id"`
+		}
+	}
+
+	err := httpx.Get(server, "/users/{id}", func(_ context.Context, input *in) (*out, error) {
+		result := &out{}
+		result.Body.ID = input.UserID
+		return result, nil
+	})
+	assert.NoError(t, err)
+
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/users/88", http.NoBody)
+	rec := httptest.NewRecorder()
+	adapter.Router().ServeHTTP(rec, req)
+
+	assert.Equal(t, http.StatusOK, rec.Code)
+	assert.Contains(t, rec.Body.String(), `"id":88`)
+}

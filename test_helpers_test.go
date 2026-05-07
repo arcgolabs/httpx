@@ -8,9 +8,6 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	adapterecho "github.com/arcgolabs/httpx/adapter/echo"
-	adapterfiber "github.com/arcgolabs/httpx/adapter/fiber"
-	adaptergin "github.com/arcgolabs/httpx/adapter/gin"
 	adapterstd "github.com/arcgolabs/httpx/adapter/std"
 	"github.com/stretchr/testify/require"
 )
@@ -33,34 +30,6 @@ func serveRequest(tb testing.TB, server ServerRuntime, req *http.Request) *httpt
 	case *adapterstd.Adapter:
 		rec := httptest.NewRecorder()
 		host.Router().ServeHTTP(rec, req)
-		return rec
-	case *adaptergin.Adapter:
-		rec := httptest.NewRecorder()
-		host.Router().ServeHTTP(rec, req)
-		return rec
-	case *adapterecho.Adapter:
-		rec := httptest.NewRecorder()
-		host.Router().ServeHTTP(rec, req)
-		return rec
-	case *adapterfiber.Adapter:
-		resp, err := host.Router().Test(req, -1)
-		require.NoError(tb, err)
-		defer func() {
-			require.NoError(tb, resp.Body.Close())
-		}()
-
-		rec := httptest.NewRecorder()
-		for key, values := range resp.Header {
-			for _, value := range values {
-				rec.Header().Add(key, value)
-			}
-		}
-		rec.WriteHeader(resp.StatusCode)
-
-		body, err := io.ReadAll(resp.Body)
-		require.NoError(tb, err)
-		_, err = rec.Body.Write(body)
-		require.NoError(tb, err)
 		return rec
 	default:
 		tb.Fatalf("unsupported adapter type %T", host)
