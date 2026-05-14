@@ -38,6 +38,13 @@ type (
 	AutoRoute                   = httpx.AutoRoute
 	RoutePolicy[I, O any]       = httpx.RoutePolicy[I, O]
 	TypedHandler[I, O any]      = httpx.TypedHandler[I, O]
+	RequestStream               = httpx.RequestStream
+	ResponseStream              = httpx.ResponseStream
+	PathTail                    = httpx.PathTail
+	ETag                        = httpx.ETag
+	ETagSet                     = httpx.ETagSet
+	ByteRange                   = httpx.ByteRange
+	ContentMD5                  = httpx.ContentMD5
 	SSEHandler[I any]           = httpx.SSEHandler[I]
 	SSESender                   = httpx.SSESender
 	SecurityOptions             = httpx.SecurityOptions
@@ -63,6 +70,10 @@ var (
 	BindGracefulShutdownHooks = httpx.BindGracefulShutdownHooks
 	OperationConditionalRead  = httpx.OperationConditionalRead
 	OperationConditionalWrite = httpx.OperationConditionalWrite
+	OperationBinaryRequest    = httpx.OperationBinaryRequest
+	OperationBinaryResponse   = httpx.OperationBinaryResponse
+	StreamReader              = httpx.StreamReader
+	RawPathParam              = httpx.RawPathParam
 	Tags                      = httpx.Tags
 	TagDefinitions            = httpx.TagDefinitions
 	Parameters                = httpx.Parameters

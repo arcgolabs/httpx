@@ -37,3 +37,37 @@ func TestAdapter_RouterServesTypedRoute(t *testing.T) {
 	require.Equal(t, http.StatusOK, rec.Code)
 	assert.Contains(t, rec.Body.String(), "pong")
 }
+
+func TestAdapter_CatchAllPathBinding(t *testing.T) {
+	a := stdadapter.New(nil)
+
+	type in struct {
+		Bucket string `path:"bucket"`
+		Key    string `path:"key"`
+	}
+	type out struct {
+		Body struct {
+			Bucket string `json:"bucket"`
+			Key    string `json:"key"`
+		}
+	}
+
+	huma.Register(a.HumaAPI(), huma.Operation{
+		OperationID: "get-object",
+		Method:      http.MethodGet,
+		Path:        "/{bucket}/{key...}",
+	}, func(_ context.Context, input *in) (*out, error) {
+		result := &out{}
+		result.Body.Bucket = input.Bucket
+		result.Body.Key = input.Key
+		return result, nil
+	})
+
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/photos/a%2Fb%20c", http.NoBody)
+	rec := httptest.NewRecorder()
+	a.Router().ServeHTTP(rec, req)
+
+	require.Equal(t, http.StatusOK, rec.Code)
+	assert.Contains(t, rec.Body.String(), `"bucket":"photos"`)
+	assert.Contains(t, rec.Body.String(), `"key":"a/b c"`)
+}

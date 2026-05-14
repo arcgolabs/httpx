@@ -25,6 +25,18 @@ func OperationBinaryResponse(contentTypes ...string) OperationOption {
 	}
 }
 
+// OperationBinaryRequest documents a binary request payload.
+func OperationBinaryRequest(contentTypes ...string) OperationOption {
+	normalized := normalizeContentTypes(contentTypes, "application/octet-stream")
+
+	return func(op *huma.Operation) {
+		if op == nil {
+			return
+		}
+		ensureBinaryRequestBody(op, normalized)
+	}
+}
+
 // OperationHTMLResponse documents HTML payload for HTTP 200.
 func OperationHTMLResponse() OperationOption {
 	return func(op *huma.Operation) {
@@ -41,6 +53,28 @@ func OperationHTMLResponse() OperationOption {
 			},
 		}
 	}
+}
+
+func ensureBinaryRequestBody(op *huma.Operation, contentTypes []string) {
+	if op.RequestBody == nil {
+		op.RequestBody = &huma.RequestBody{
+			Required: true,
+		}
+	}
+	if op.RequestBody.Content == nil {
+		op.RequestBody.Content = map[string]*huma.MediaType{}
+	}
+	lo.ForEach(contentTypes, func(contentType string, _ int) {
+		if _, exists := op.RequestBody.Content[contentType]; exists {
+			return
+		}
+		op.RequestBody.Content[contentType] = &huma.MediaType{
+			Schema: &huma.Schema{
+				Type:   huma.TypeString,
+				Format: "binary",
+			},
+		}
+	})
 }
 
 // PolicyImageResponse applies runtime default Content-Type and OpenAPI binary response.

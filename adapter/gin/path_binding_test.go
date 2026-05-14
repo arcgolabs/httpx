@@ -40,3 +40,35 @@ func TestAdapter_StrongTypedPathBinding(t *testing.T) {
 	assert.Equal(t, http.StatusOK, rec.Code)
 	assert.Contains(t, rec.Body.String(), `"id":88`)
 }
+
+func TestAdapter_CatchAllPathBinding(t *testing.T) {
+	adapter := ginadapter.New(nil)
+	server := httpx.New(httpx.WithAdapter(adapter))
+
+	type in struct {
+		Bucket string `path:"bucket"`
+		Key    string `path:"key"`
+	}
+	type out struct {
+		Body struct {
+			Bucket string `json:"bucket"`
+			Key    string `json:"key"`
+		}
+	}
+
+	err := httpx.Get(server, "/{bucket}/{key...}", func(_ context.Context, input *in) (*out, error) {
+		result := &out{}
+		result.Body.Bucket = input.Bucket
+		result.Body.Key = input.Key
+		return result, nil
+	})
+	assert.NoError(t, err)
+
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/photos/a%2Fb%20c", http.NoBody)
+	rec := httptest.NewRecorder()
+	adapter.Router().ServeHTTP(rec, req)
+
+	assert.Equal(t, http.StatusOK, rec.Code)
+	assert.Contains(t, rec.Body.String(), `"bucket":"photos"`)
+	assert.Contains(t, rec.Body.String(), `"key":"a/b c"`)
+}

@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/arcgolabs/collectionx/list"
+	"github.com/arcgolabs/httpx/adapter"
 	"github.com/arcgolabs/pkg/option"
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/samber/lo"
@@ -201,6 +202,11 @@ func registerTyped[I, O any](
 	op := newTypedOperation(method, registerPath, fullPath, operationOptions, policies)
 	handlerName := handlerName(handler)
 	applyOperationModifiers(&op, s.operationModifiers)
+	if err := adapter.NormalizeOperationPath(&op); err != nil {
+		return oops.In("httpx").
+			With("op", "register_route", "method", strings.ToUpper(method), "path", fullPath, "register_path", registerPath, "operation_id", op.OperationID).
+			Wrapf(err, "normalize route path")
+	}
 	if s.logger != nil && s.logger.Enabled(context.Background(), slog.LevelDebug) {
 		s.logger.Debug("httpx route registration starting",
 			"method", method,
@@ -226,7 +232,7 @@ func registerTyped[I, O any](
 			With("op", "register_route", "method", strings.ToUpper(method), "path", fullPath, "register_path", registerPath, "operation_id", op.OperationID).
 			Wrapf(err, "validate route registration")
 	}
-	huma.Register(api, op, func(ctx context.Context, input *I) (*O, error) {
+	huma.Register(registerAPIForOperation(api, op), op, func(ctx context.Context, input *I) (*O, error) {
 		return wrappedHandler(ctx, input)
 	})
 

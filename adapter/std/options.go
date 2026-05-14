@@ -18,7 +18,7 @@ func New(router *chi.Mux, opts ...adapter.HumaOptions) *Adapter {
 	humaOpts := adapter.MergeHumaOptions(opts...)
 	cfg := huma.DefaultConfig(humaOpts.Title, humaOpts.Version)
 	adapter.ApplyHumaConfig(&cfg, humaOpts)
-	api := humachi.New(router, cfg)
+	api := huma.NewAPI(cfg, adapter.NewPathAdapter(humachi.NewAdapter(router), adapter.RouterPathChi))
 
 	return &Adapter{
 		router:    router,

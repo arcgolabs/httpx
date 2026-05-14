@@ -32,7 +32,8 @@ func New(engine *echo.Echo, opts ...adapter.HumaOptions) *Adapter {
 	humaOpts := adapter.MergeHumaOptions(opts...)
 	cfg := huma.DefaultConfig(humaOpts.Title, humaOpts.Version)
 	adapter.ApplyHumaConfig(&cfg, humaOpts)
-	api := humaecho.New(eng, cfg)
+	baseAPI := humaecho.New(eng, adapter.RouterOnlyConfig(cfg))
+	api := huma.NewAPI(cfg, adapter.NewPathAdapter(baseAPI.Adapter(), adapter.RouterPathEcho))
 
 	return &Adapter{
 		engine:    eng,

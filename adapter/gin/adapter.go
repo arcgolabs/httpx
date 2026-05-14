@@ -34,7 +34,8 @@ func New(engine *gin.Engine, opts ...adapter.HumaOptions) *Adapter {
 	humaOpts := adapter.MergeHumaOptions(opts...)
 	cfg := huma.DefaultConfig(humaOpts.Title, humaOpts.Version)
 	adapter.ApplyHumaConfig(&cfg, humaOpts)
-	api := humagin.New(eng, cfg)
+	baseAPI := humagin.New(eng, adapter.RouterOnlyConfig(cfg))
+	api := huma.NewAPI(cfg, adapter.NewPathAdapter(baseAPI.Adapter(), adapter.RouterPathGin))
 
 	return &Adapter{
 		engine:    eng,

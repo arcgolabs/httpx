@@ -15,6 +15,7 @@ type routeMatcher struct {
 type routeMatcherNode struct {
 	staticChildren map[string]*routeMatcherNode
 	paramChild     *routeMatcherNode
+	catchAllChild  *routeMatcherNode
 	routes         []routeMatchEntry
 	minSeq         uint64
 }
@@ -68,7 +69,7 @@ func (m *routeMatcher) Match(path string) (RouteInfo, bool) {
 		return RouteInfo{}, false
 	}
 
-	matched, ok := m.root.match(segments, 0)
+	matched, ok := m.root.match(segments, 0, pathHasTrailingSlash(path))
 	if !ok {
 		return RouteInfo{}, false
 	}
@@ -78,6 +79,12 @@ func (m *routeMatcher) Match(path string) (RouteInfo, bool) {
 func (n *routeMatcherNode) ensureChild(segment string) *routeMatcherNode {
 	if n == nil {
 		return nil
+	}
+	if isCatchAllPathParameterSegment(segment) {
+		if n.catchAllChild == nil {
+			n.catchAllChild = &routeMatcherNode{}
+		}
+		return n.catchAllChild
 	}
 	if isPathParameterSegment(segment) {
 		if n.paramChild == nil {
@@ -101,31 +108,45 @@ func (m *routeMatcher) ensureRootLocked() *routeMatcherNode {
 	return m.root
 }
 
-func (n *routeMatcherNode) match(segments []string, index int) (routeMatchEntry, bool) {
+func (n *routeMatcherNode) match(segments []string, index int, trailingSlash bool) (routeMatchEntry, bool) {
 	if n == nil {
 		return routeMatchEntry{}, false
 	}
 
 	if index == len(segments) {
-		return n.routeAtCurrentNode()
+		return n.matchCurrent(trailingSlash)
 	}
 
+	return n.matchNext(segments, index, trailingSlash)
+}
+
+func (n *routeMatcherNode) matchCurrent(trailingSlash bool) (routeMatchEntry, bool) {
+	if matched, ok := n.routeAtCurrentNode(); ok {
+		return matched, true
+	}
+	if trailingSlash {
+		return matchCatchAllRouteChild(n.catchAllChild)
+	}
+	return routeMatchEntry{}, false
+}
+
+func (n *routeMatcherNode) matchNext(segments []string, index int, trailingSlash bool) (routeMatchEntry, bool) {
 	segment := segments[index]
 	staticChild := n.staticChildren[segment]
 	paramChild := n.paramChild
-
-	first, second := orderedRouteChildren(staticChild, paramChild)
-	if matched, ok := matchRouteChild(first, segments, index+1); ok {
-		if second == nil || second.minSeq == 0 || second.minSeq >= matched.seq {
+	for _, child := range orderedRouteChildren(staticChild, paramChild, n.catchAllChild) {
+		if child.catchAll {
+			if matched, ok := matchCatchAllRouteChild(child.node); ok {
+				return matched, true
+			}
+			continue
+		}
+		if matched, ok := matchRouteChild(child.node, segments, index+1, trailingSlash); ok {
 			return matched, true
 		}
-		if alternative, ok := matchRouteChild(second, segments, index+1); ok && alternative.seq < matched.seq {
-			return alternative, true
-		}
-		return matched, true
 	}
 
-	return matchRouteChild(second, segments, index+1)
+	return routeMatchEntry{}, false
 }
 
 func (n *routeMatcherNode) routeAtCurrentNode() (routeMatchEntry, bool) {
@@ -144,28 +165,77 @@ func (n *routeMatcherNode) recordMinSeq(seq uint64) {
 	}
 }
 
-func orderedRouteChildren(left, right *routeMatcherNode) (*routeMatcherNode, *routeMatcherNode) {
+type routeMatcherChild struct {
+	node     *routeMatcherNode
+	catchAll bool
+}
+
+func orderedRouteChildren(children ...*routeMatcherNode) []routeMatcherChild {
+	ordered := orderedNonCatchAllRouteChildren(children)
+	if len(children) > 2 && children[2] != nil {
+		ordered = append(ordered, routeMatcherChild{
+			node:     children[2],
+			catchAll: true,
+		})
+	}
+	return ordered
+}
+
+func orderedNonCatchAllRouteChildren(children []*routeMatcherNode) []routeMatcherChild {
+	limit := min(len(children), 2)
+	ordered := make([]routeMatcherChild, 0, len(children))
+	for _, child := range children[:limit] {
+		if child == nil {
+			continue
+		}
+		ordered = insertRouteMatcherChild(ordered, routeMatcherChild{
+			node: child,
+		})
+	}
+	return ordered
+}
+
+func insertRouteMatcherChild(ordered []routeMatcherChild, candidate routeMatcherChild) []routeMatcherChild {
+	insertAt := len(ordered)
+	for i, existing := range ordered {
+		if childSeqLess(candidate.node, existing.node) {
+			insertAt = i
+			break
+		}
+	}
+	ordered = append(ordered, routeMatcherChild{})
+	copy(ordered[insertAt+1:], ordered[insertAt:])
+	ordered[insertAt] = candidate
+	return ordered
+}
+
+func childSeqLess(left, right *routeMatcherNode) bool {
 	switch {
-	case left == nil:
-		return right, nil
 	case right == nil:
-		return left, nil
+		return true
+	case left == nil:
+		return false
 	case left.minSeq == 0:
-		return right, left
+		return false
 	case right.minSeq == 0:
-		return left, right
-	case left.minSeq <= right.minSeq:
-		return left, right
+		return true
 	default:
-		return right, left
+		return left.minSeq < right.minSeq
 	}
 }
 
-func matchRouteChild(node *routeMatcherNode, segments []string, index int) (routeMatchEntry, bool) {
+func matchRouteChild(node *routeMatcherNode, segments []string, index int, trailingSlash bool) (routeMatchEntry, bool) {
 	if node == nil {
 		return routeMatchEntry{}, false
 	}
-	return node.match(segments, index)
+	return node.match(segments, index, trailingSlash)
+}
+
+func matchCatchAllRouteChild(node *routeMatcherNode) (routeMatchEntry, bool) {
+	if node == nil {
+		return routeMatchEntry{}, false
+	}
+	return node.routeAtCurrentNode()
 }
 
 func splitRouteSegments(path string) []string {
@@ -178,4 +248,12 @@ func splitRouteSegments(path string) []string {
 
 func isPathParameterSegment(segment string) bool {
 	return strings.HasPrefix(segment, "{") && strings.HasSuffix(segment, "}")
+}
+
+func isCatchAllPathParameterSegment(segment string) bool {
+	return strings.HasPrefix(segment, "{") && strings.HasSuffix(segment, "...}")
+}
+
+func pathHasTrailingSlash(path string) bool {
+	return path != "/" && strings.HasSuffix(path, "/")
 }

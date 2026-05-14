@@ -1,6 +1,8 @@
 package fiber
 
 import (
+	"net/http"
+
 	"github.com/arcgolabs/httpx/adapter"
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/danielgtaylor/huma/v2/adapters/humafiber"
@@ -19,7 +21,17 @@ func New(app *fiber.App, opts ...adapter.HumaOptions) *Adapter {
 	humaOpts := adapter.MergeHumaOptions(opts...)
 	cfg := huma.DefaultConfig(humaOpts.Title, humaOpts.Version)
 	adapter.ApplyHumaConfig(&cfg, humaOpts)
-	api := humafiber.New(resolvedApp, cfg)
+	baseAPI := humafiber.New(resolvedApp, adapter.RouterOnlyConfig(cfg))
+	api := huma.NewAPI(cfg, adapter.NewPathAdapter(
+		baseAPI.Adapter(),
+		adapter.RouterPathFiber,
+		adapter.WithMissingCatchAllHandler(func(ctx huma.Context) bool {
+			if err := humafiber.Unwrap(ctx).Next(); err != nil {
+				ctx.SetStatus(http.StatusNotFound)
+			}
+			return true
+		}),
+	))
 
 	return &Adapter{
 		app:  resolvedApp,
