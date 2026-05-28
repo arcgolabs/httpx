@@ -6,12 +6,12 @@ import (
 	"log/slog"
 	"os"
 
-	"github.com/arcgolabs/httpx/examples/shared"
-	"github.com/arcgolabs/pkg/randomport"
 	"github.com/arcgolabs/httpx/adapter"
 	"github.com/arcgolabs/httpx/adapter/fiber"
-	fiberlogger "github.com/gofiber/fiber/v2/middleware/logger"
-	fiberrecover "github.com/gofiber/fiber/v2/middleware/recover"
+	"github.com/arcgolabs/httpx/examples/shared"
+	"github.com/arcgolabs/pkg/randomport"
+	fiberlogger "github.com/gofiber/fiber/v3/middleware/logger"
+	fiberrecover "github.com/gofiber/fiber/v3/middleware/recover"
 )
 
 func main() {

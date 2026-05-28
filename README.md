@@ -31,7 +31,7 @@ go get github.com/arcgolabs/httpx@latest
     - `github.com/arcgolabs/httpx/adapter/std`
     - `github.com/arcgolabs/httpx/adapter/gin`
     - `github.com/arcgolabs/httpx/adapter/echo`
-    - `github.com/arcgolabs/httpx/adapter/fiber`
+    - `github.com/arcgolabs/httpx/adapter/fiber` (Fiber v3)
 - Optional:
     - `github.com/arcgolabs/httpx/middleware`
     - `github.com/arcgolabs/httpx/dix`

@@ -6,7 +6,7 @@ import (
 	"github.com/arcgolabs/httpx/adapter"
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/danielgtaylor/huma/v2/adapters/humafiber"
-	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v3"
 )
 
 // Adapter implements the fiber runtime bridge for httpx.

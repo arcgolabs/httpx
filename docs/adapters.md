@@ -14,7 +14,7 @@ Available adapters:
 - `httpx/adapter/std` (chi + net/http)
 - `httpx/adapter/gin`
 - `httpx/adapter/echo`
-- `httpx/adapter/fiber`
+- `httpx/adapter/fiber` (Fiber v3)
 
 You build an adapter, pass it to `httpx.New(httpx.WithAdapter(...))`, and then register routes on the returned server/group.
 

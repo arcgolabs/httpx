@@ -10,7 +10,7 @@ import (
 
 	"github.com/arcgolabs/httpx/adapter"
 	fiberadapter "github.com/arcgolabs/httpx/adapter/fiber"
-	fiberframework "github.com/gofiber/fiber/v2"
+	fiberframework "github.com/gofiber/fiber/v3"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -68,7 +68,7 @@ func TestNew_DisablesDocsRoutes(t *testing.T) {
 func assertTestStatus(t *testing.T, a *fiberadapter.Adapter, req *http.Request, expected int) {
 	t.Helper()
 
-	resp, err := a.Router().Test(req, -1)
+	resp, err := testRequest(a, req)
 	require.NoError(t, err)
 	defer func() {
 		require.NoError(t, resp.Body.Close())

@@ -34,7 +34,7 @@ func TestAdapter_StrongTypedPathBinding(t *testing.T) {
 	assert.NoError(t, err)
 
 	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/users/66", http.NoBody)
-	resp, err := adapter.Router().Test(req, -1)
+	resp, err := testRequest(adapter, req)
 	require.NoError(t, err)
 	defer func() {
 		require.NoError(t, resp.Body.Close())
@@ -71,7 +71,7 @@ func TestAdapter_CatchAllPathBinding(t *testing.T) {
 	assert.NoError(t, err)
 
 	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/photos/a%2Fb%20c", http.NoBody)
-	resp, err := adapter.Router().Test(req, -1)
+	resp, err := testRequest(adapter, req)
 	require.NoError(t, err)
 	defer func() {
 		require.NoError(t, resp.Body.Close())
@@ -122,7 +122,7 @@ func TestAdapter_CatchAllDoesNotCaptureBareParentPath(t *testing.T) {
 	require.NoError(t, err)
 
 	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/photos", http.NoBody)
-	resp, err := adapter.Router().Test(req, -1)
+	resp, err := testRequest(adapter, req)
 	require.NoError(t, err)
 	defer func() {
 		require.NoError(t, resp.Body.Close())

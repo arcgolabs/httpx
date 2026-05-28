@@ -41,7 +41,7 @@ func BenchmarkAdapterTestRequest(b *testing.B) {
 
 	for range b.N {
 		req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/ping", http.NoBody)
-		resp, err := a.Router().Test(req, -1)
+		resp, err := testRequest(a, req)
 		if err != nil {
 			b.Fatalf("fiber test request failed: %v", err)
 		}
