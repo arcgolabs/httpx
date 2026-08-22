@@ -73,7 +73,7 @@ func expandTags(tags OpenAPITags) []string {
 	if tags.IsEmpty() {
 		return nil
 	}
-	return tags.Where(func(_ int, tag string) bool {
+	return list.FilterList(tags, func(_ int, tag string) bool {
 		return tag != ""
 	}).Values()
 }

@@ -150,7 +150,7 @@ func conditionalParamsFromPointerField(field reflect.Value) *ConditionalParams {
 	if field.IsNil() || !field.CanInterface() {
 		return nil
 	}
-	params, ok := field.Interface().(*ConditionalParams)
+	params, ok := reflect.TypeAssert[*ConditionalParams](field)
 	if !ok {
 		return nil
 	}
@@ -165,7 +165,7 @@ func conditionalParamsFromValueField(field reflect.Value) *ConditionalParams {
 	if !addr.CanInterface() {
 		return nil
 	}
-	params, ok := addr.Interface().(*ConditionalParams)
+	params, ok := reflect.TypeAssert[*ConditionalParams](addr)
 	if !ok {
 		return nil
 	}

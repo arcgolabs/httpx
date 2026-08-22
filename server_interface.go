@@ -53,8 +53,8 @@ type ServerRuntime interface {
 	asServer() *Server
 }
 
-// New creates a server exposed as the stable interface contract.
-func New(opts ...ServerOption) ServerRuntime {
+// New creates a server.
+func New(opts ...ServerOption) *Server {
 	return newServer(opts...)
 }
 

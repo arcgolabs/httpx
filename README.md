@@ -45,6 +45,7 @@ go get github.com/arcgolabs/httpx@latest
 - Middleware and observability: [Middleware and Observability](./middleware-and-observability)
 - DI wiring: [dix Integration](./dix-integration)
 - OpenAPI and docs: [OpenAPI and docs](./openapi-and-docs)
+- Breaking upgrade notes: [Migrating to Go 1.27](./migrating-to-go-1.27)
 
 ## Runnable examples (repository)
 

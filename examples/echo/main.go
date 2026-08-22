@@ -6,11 +6,11 @@ import (
 	"log/slog"
 	"os"
 
-	"github.com/arcgolabs/httpx/examples/shared"
-	"github.com/arcgolabs/pkg/randomport"
 	"github.com/arcgolabs/httpx/adapter"
 	"github.com/arcgolabs/httpx/adapter/echo"
-	echoMiddleware "github.com/labstack/echo/v4/middleware"
+	"github.com/arcgolabs/httpx/examples/shared"
+	"github.com/arcgolabs/pkg/randomport"
+	echoMiddleware "github.com/labstack/echo/v5/middleware"
 )
 
 func main() {

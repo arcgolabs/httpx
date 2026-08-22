@@ -8,7 +8,7 @@ import (
 
 	"github.com/arcgolabs/httpx/adapter"
 	echoadapter "github.com/arcgolabs/httpx/adapter/echo"
-	echoframework "github.com/labstack/echo/v4"
+	echoframework "github.com/labstack/echo/v5"
 	"github.com/stretchr/testify/assert"
 )
 

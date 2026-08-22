@@ -7,7 +7,7 @@ weight: 2
 
 ## Getting Started
 
-`httpx` is a lightweight HTTP service organization layer built on top of Huma. You pick an adapter (`std`, `gin`, `echo`, `fiber`) and register typed routes via `httpx.Get/Post/...` (or `MustGet/MustPost/...`).
+`httpx` is a lightweight HTTP service organization layer built on top of Huma. You pick an adapter (`std`, `gin`, `echo`, `fiber`) and register typed routes via Go 1.27 generic methods such as `server.Get/Post/...` (or `MustGet/MustPost/...`). The package-level helpers remain available for compatibility.
 
 This page shows a minimal server with:
 
@@ -86,7 +86,7 @@ func main() {
 		httpx.WithValidation(),
 	)
 
-	httpx.MustGet(server, "/health", func(ctx context.Context, _ *struct{}) (*healthOutput, error) {
+	server.MustGet("/health", func(ctx context.Context, _ *struct{}) (*healthOutput, error) {
 		out := &healthOutput{}
 		out.Body.Status = "ok"
 		return out, nil
@@ -102,7 +102,7 @@ func main() {
 		return out, nil
 	})
 
-	httpx.MustGroupGet(v1, "/users/{id}", func(ctx context.Context, in *getUserInput) (*getUserOutput, error) {
+	v1.MustGet("/users/{id}", func(ctx context.Context, in *getUserInput) (*getUserOutput, error) {
 		out := &getUserOutput{}
 		out.Body.ID = in.ID
 		out.Body.Name = "demo-user"
@@ -117,4 +117,3 @@ func main() {
 
 - Adapter choices and wiring: [Adapters](./adapters)
 - OpenAPI and docs control: [OpenAPI and docs](./openapi-and-docs)
-

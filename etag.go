@@ -1,6 +1,7 @@
 package httpx
 
 import (
+	"slices"
 	"strconv"
 	"strings"
 
@@ -77,27 +78,29 @@ func (e ETag) Schema(_ huma.Registry) *huma.Schema {
 }
 
 // ETagSet represents an HTTP entity tag list, such as If-Match.
-type ETagSet []ETag
+type ETagSet struct {
+	values []ETag
+}
 
 // ParseETagSet parses an HTTP entity tag list.
 func ParseETagSet(value string) (ETagSet, error) {
 	parts, err := splitHeaderList(value)
 	if err != nil {
-		return nil, err
+		return ETagSet{}, err
 	}
 	if len(parts) == 0 {
-		return nil, ErrInvalidETag
+		return ETagSet{}, ErrInvalidETag
 	}
 
-	values := make(ETagSet, 0, len(parts))
+	values := make([]ETag, 0, len(parts))
 	for _, part := range parts {
 		etag, err := ParseETag(part)
 		if err != nil {
-			return nil, err
+			return ETagSet{}, err
 		}
 		values = append(values, etag)
 	}
-	return values, nil
+	return ETagSet{values: values}, nil
 }
 
 // UnmarshalText parses an entity tag list from a header value.
@@ -112,16 +115,21 @@ func (s *ETagSet) UnmarshalText(text []byte) error {
 
 // String returns the canonical header representation.
 func (s ETagSet) String() string {
-	parts := make([]string, 0, len(s))
-	for _, etag := range s {
+	parts := make([]string, 0, len(s.values))
+	for _, etag := range s.values {
 		parts = append(parts, etag.String())
 	}
 	return strings.Join(parts, ", ")
 }
 
+// Values returns a copy of the entity tags in the set.
+func (s ETagSet) Values() []ETag {
+	return slices.Clone(s.values)
+}
+
 // Contains reports whether candidate is present in the set.
 func (s ETagSet) Contains(candidate ETag) bool {
-	for _, etag := range s {
+	for _, etag := range s.values {
 		if etag.Match(candidate) {
 			return true
 		}

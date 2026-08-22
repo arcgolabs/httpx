@@ -44,7 +44,7 @@ func (s *Server) GetRoutesByPath(prefix string) *list.List[RouteInfo] {
 	if prefix == "" {
 		return s.GetRoutes()
 	}
-	return s.routes.Where(func(_ int, route RouteInfo) bool {
+	return list.FilterList(s.routes, func(_ int, route RouteInfo) bool {
 		return strings.HasPrefix(route.Path, prefix)
 	})
 }

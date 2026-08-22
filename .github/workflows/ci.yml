@@ -24,12 +24,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v7
         with:
-          go-version: "1.26.2"
+          go-version-file: go.work
           cache-dependency-path: |
             go.sum
             adapter/*/go.sum
@@ -65,12 +65,12 @@ jobs:
           - examples
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v7
         with:
-          go-version: "1.26.2"
+          go-version-file: go.work
           cache-dependency-path: |
             go.sum
             adapter/*/go.sum
@@ -101,14 +101,15 @@ jobs:
           - fx
           - middleware
           - websocket
+          - examples
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v7
         with:
-          go-version: "1.26.2"
+          go-version-file: go.work
           cache-dependency-path: |
             go.sum
             adapter/*/go.sum
@@ -116,9 +117,10 @@ jobs:
             fx/go.sum
             middleware/go.sum
             websocket/go.sum
+            examples/go.sum
 
       - name: Install golangci-lint
-        run: go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.12.2
+        run: go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.13.1
 
       - name: Lint
         working-directory: ${{ matrix.module }}

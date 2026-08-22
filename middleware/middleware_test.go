@@ -63,6 +63,21 @@ func TestPrometheusMiddleware_WithHTTPXRoutePattern_UsesRouteTemplateLabel(t *te
 	}
 }
 
+func TestPrometheusMiddleware_PreservesResponseControllerCapabilities(t *testing.T) {
+	var flushErr error
+	handler := middleware.PrometheusMiddleware(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		flushErr = http.NewResponseController(w).Flush()
+	}))
+
+	recorder := httptest.NewRecorder()
+	request := httptest.NewRequestWithContext(t.Context(), http.MethodGet, "/stream", http.NoBody)
+	handler.ServeHTTP(recorder, request)
+
+	if flushErr != nil {
+		t.Fatalf("flush through Prometheus middleware: %v", flushErr)
+	}
+}
+
 func TestOpenTelemetryMiddleware_WithHTTPXRoutePattern_UsesRouteTemplateSpanName(t *testing.T) {
 	server := httpx.New()
 

@@ -10,9 +10,11 @@ import (
 	"github.com/arcgolabs/httpx/adapter"
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/danielgtaylor/huma/v2/adapters/humaecho"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/samber/oops"
 )
+
+const gracefulShutdownTimeout = 30 * time.Second
 
 type lifecycleState struct {
 	mu     sync.Mutex
@@ -65,7 +67,7 @@ func (a *Adapter) Listen(addr string) error {
 	release := a.trackServer(server)
 	defer release()
 
-	if err := a.engine.StartServer(server); err != nil {
+	if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		return wrapEchoListenError(addr, err)
 	}
 	return nil
@@ -101,7 +103,7 @@ func (a *Adapter) ListenContext(ctx context.Context, addr string) error {
 
 	errCh := make(chan error, 1)
 	go func() {
-		errCh <- a.engine.StartServer(server)
+		errCh <- server.ListenAndServe()
 	}()
 
 	select {
@@ -111,7 +113,9 @@ func (a *Adapter) ListenContext(ctx context.Context, addr string) error {
 		}
 		return wrapEchoListenError(addr, err)
 	case <-ctx.Done():
-		if err := a.shutdownContext(ctx); err != nil {
+		shutdownCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), gracefulShutdownTimeout)
+		defer cancel()
+		if err := a.shutdownContext(shutdownCtx); err != nil {
 			return oops.In("httpx/adapter/echo").
 				With("op", "shutdown", "addr", addr).
 				Wrapf(err, "httpx/echo: shutdown on %q", addr)
